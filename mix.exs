@@ -16,8 +16,8 @@ defmodule ExDynamoDbModel.Mixfile do
   # { :foobar, "0.1", git: "https://github.com/elixir-lang/foobar.git" }
   defp deps do
     [ { :uuid,              github: "avtobiff/erlang-uuid"      },
-      { :meck,              github: "eproxus/meck"              },
-      { :jsx,               github: "talentdeficit/jsx"         },
+      { :meck,              github: "eproxus/meck", override: true },
+      { :jsx,               github: "talentdeficit/jsx", override: true},
       { :erlcloud,          github: "gleber/erlcloud"           }]
   end
 end
