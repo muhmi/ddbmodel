@@ -17,7 +17,7 @@ defmodule DDBModel do
   end
   
   @doc "define a column"
-  defmacro defcolumn(name, opts // []), do: DDBModel.Columns.generate(:column, name, opts)
+  defmacro defcolumn(name, opts \\ []), do: DDBModel.Columns.generate(:column, name, opts)
   
   defmacro with_timestamps do
     quote do

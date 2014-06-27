@@ -217,7 +217,7 @@ defmodule DDBModel.DB do
       defp query_q({:between, range_key1, range_key2}), do: {{range_key1, range_key2}, :between}
       defp query_q(nil), do: nil
 
-      def query(hash_key, predicate // nil, limit // nil, offset // nil, forward // true) do
+      def query(hash_key, predicate \\ nil, limit \\ nil, offset \\ nil, forward \\ true) do
 
         spec = [ scan_index_forward: forward,
                  out: :record,
@@ -241,7 +241,7 @@ defmodule DDBModel.DB do
       defp scan_q({k,op,v}) when op in [:in,:eq,:ne,:le,:lt,:ge,:gt,:contains,:not_contains,:begins_with], do: {k, v, op}
       defp scan_q({k, :between, {v1, v2}}), do: {k, {v1, v2}, :between}
 
-      def scan(predicates // [], limit // nil, offset // nil) do
+      def scan(predicates \\ [], limit \\ nil, offset \\ nil) do
 
         spec = [ out: :record,
                  scan_filter: Enum.map(predicates, &scan_q(&1)),
