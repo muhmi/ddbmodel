@@ -192,9 +192,9 @@ defmodule DDBModel.DB do
         case :erlcloud_ddb.batch_get_item({table_name, ids}) do
           {:ok, items}     -> result = Enum.map(items, fn(item) -> from_dynamo(item) end)
                               result = Enum.sort result, fn(r1, r2) ->
-                                (Enum.find_index ids, r1.id == &1)
+                                (Enum.find_index ids, &(r1.id == &1))
                                   <
-                                (Enum.find_index ids, r2.id == &1)
+                                (Enum.find_index ids, &(r2.id == &1))
                                end
                               {:ok, result }
           error            -> error
@@ -228,7 +228,7 @@ defmodule DDBModel.DB do
         spec = Enum.filter spec, fn({k,v}) -> v != nil and v != [] end
 
         case :erlcloud_ddb.q(table_name,hash_key,spec) do
-          {:ok, {_,_,result,offset,_}} -> {:ok, offset, Enum.map( result, from_dynamo(&1))}
+          {:ok, {_,_,result,offset,_}} -> {:ok, offset, Enum.map( result, from_dynamo(&(&1)))}
           error                   -> error
         end
       end
@@ -251,7 +251,7 @@ defmodule DDBModel.DB do
         spec = Enum.filter spec, fn({k,v}) -> v != nil and v != [] end
 
         case :erlcloud_ddb.scan(table_name, spec) do
-          {:ok,{_,result,_,_,offset,_}} -> {:ok, offset, Enum.map( result, from_dynamo(&1))}
+          {:ok,{_,result,_,_,offset,_}} -> {:ok, offset, Enum.map( result, from_dynamo(&(&1)))}
           error -> error
         end
 

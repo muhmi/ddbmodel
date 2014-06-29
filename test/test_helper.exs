@@ -51,7 +51,7 @@ defmodule TestValidate do
   use DDBModel
   
   defcolumn :first_name, default: "John", validate: fn(first_name) -> first_name == "John" end
-  defcolumn :last_name, default: "Doe", validate: &1 == "Doe"
+  defcolumn :last_name, default: "Doe", validate: &(&1 == "Doe")
   defcolumn :status, default: :A, null: :false
   defcolumn :membership, default: :free, in_list: [:free, :paid]
   

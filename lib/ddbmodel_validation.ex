@@ -10,7 +10,7 @@ defmodule DDBModel.Validation do
           end
         end
         
-        case Enum.filter (List.flatten res), &1 != :ok do
+        case Enum.filter (List.flatten res), &(&1 != :ok) do
           []    -> :ok
           error -> error
         end
@@ -22,7 +22,7 @@ defmodule DDBModel.Validation do
       def validate(:null, _, _, _), do: :ok
       
       def validate(:in_list, l, k, v) when is_list(l) do
-        if Enum.any? l, &1 == v do
+        if Enum.any? l, &(&1 == v) do
           :ok
         else
           {:error, {k, atom_to_binary(k) <> " must be in list " <> (inspect l)}}
@@ -63,7 +63,7 @@ defmodule DDBModel.Validation do
       
       def before_save(:uuid, v) do
         if v == nil do
-          list_to_binary(:uuid.to_string :uuid.uuid4())
+          :binary.list_to_bin(:uuid.to_string :uuid.uuid4())
         else
           v
         end
