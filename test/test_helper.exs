@@ -1,5 +1,6 @@
 ExUnit.start
 
+
 defmodule TestDefaultTableName do
   use DDBModel
 end
@@ -73,4 +74,29 @@ defmodule TestModelHashKey do
   
   defcolumn :uuid, type: :uuid
     
+end
+
+defmodule TestModels do
+  defp tables do
+    [
+      TestDefaultTableName,
+      TestCustomTableName,
+      TestDefaultKey,
+      TestCustomKey,
+      TestDefColumn,
+      TestDefColumnDefault,
+      TestMassAssignment,
+      TestValidate,
+      TestCustomValidate,
+      TestModelHashKey
+    ]
+  end
+
+  def prepare do
+    Enum.map tables, fn (model) -> model.create_table() end
+  end
+
+  def tearDown do
+    Enum.map tables, fn (model) -> model.delete_table() end
+  end
 end

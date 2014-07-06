@@ -18,14 +18,14 @@ defmodule DDBModel.Validation do
       
       defoverridable [validate: 1]
       
-      def validate(:null, false, k, nil), do: {:error, {k, atom_to_binary(k) <> " must not be null"}}
+      def validate(:null, false, k, nil), do: {:error, {k, Atom.to_string(k) <> " must not be null"}}
       def validate(:null, _, _, _), do: :ok
       
       def validate(:in_list, l, k, v) when is_list(l) do
         if Enum.any? l, &(&1 == v) do
           :ok
         else
-          {:error, {k, atom_to_binary(k) <> " must be in list " <> (inspect l)}}
+          {:error, {k, Atom.to_string(k) <> " must be in list " <> (inspect l)}}
         end
       end
       def validate(:in_list, _, _, _), do: :ok
@@ -33,7 +33,7 @@ defmodule DDBModel.Validation do
       def validate(:validate, f, k, v) when is_function(f) do
         case f.(v) do
           true  -> :ok
-          false -> {:error, {k, atom_to_binary(k) <> " failed validation"}}
+          false -> {:error, {k, Atom.to_string(k) <> " failed validation"}}
           res   -> res
         end
       end

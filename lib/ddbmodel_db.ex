@@ -1,11 +1,12 @@
 defmodule DDBModel.DB do
   def generate(:model) do
 
+
     quote do
 
       def to_dynamo(record={__MODULE__,dict}) do
         res = Enum.map model_columns, fn({k,opts}) ->
-          {atom_to_binary(k), to_dynamo(opts[:type], dict[k])}
+          {Atom.to_string(k), to_dynamo(opts[:type], dict[k])}
         end
         Enum.filter res, fn ({k,v}) -> v != nil and v != "" end
       end
@@ -13,13 +14,13 @@ defmodule DDBModel.DB do
       def from_dynamo(dict) do
 
         res = Enum.map model_columns, fn({k,opts}) ->
-          {k, from_dynamo(opts[:type], dict[atom_to_binary(k)])}
+          {k, from_dynamo(opts[:type], dict[Atom.to_string(k)])}
         end
         new(res)
       end
 
-      def to_dynamo(:atom, v),    do: atom_to_binary(v)
-      def from_dynamo(:atom, v),  do: binary_to_atom(v)
+      def to_dynamo(:atom, v),    do: Atom.to_string(v)
+      def from_dynamo(:atom, v),  do: String.to_atom(v)
 
       def to_dynamo(:json, nil),        do: "null"
       def from_dynamo(:json, "null"),   do: nil
@@ -29,6 +30,20 @@ defmodule DDBModel.DB do
       def to_dynamo(_,v),   do: v
       def from_dynamo(_,v), do: v
 
+
+      def create_table do
+        case :erlcloud_ddb2.create_table(table_name, {key, :s}, key, 1, 1) do
+          {:ok, result}   -> :ok
+          error           -> error
+        end
+      end
+
+      def delete_table do
+        case :erlcloud_ddb2.delete_table(table_name) do
+          {:ok, result}   -> :ok
+          error           -> error
+        end
+      end
       # --------------------------------------------
       # Put
       # --------------------------------------------
@@ -45,7 +60,7 @@ defmodule DDBModel.DB do
 
         case validate(record) do
           :ok ->
-            case :erlcloud_ddb.put_item(table_name, to_dynamo(record)) do
+            case :erlcloud_ddb2.put_item(table_name, to_dynamo(record)) do
               {:ok, result}   -> {:ok, after_put(record)}
               error           -> error
             end
@@ -55,7 +70,7 @@ defmodule DDBModel.DB do
 
 
       def put!(records) when is_list records do
-        # res = :erlcloud_ddb.batch_write_item([{TestModelHashKey.table_name, [{:put, [{"uuid", "12345"} ]}]}])
+        # res = :erlcloud_ddb2.batch_write_item([{TestModelHashKey.table_name, [{:put, [{"uuid", "12345"} ]}]}])
 
         records = Enum.map records, fn(record) -> before_put(before_save record) end
         validations = Enum.map records, fn(record) -> validate record end
@@ -63,7 +78,7 @@ defmodule DDBModel.DB do
 
         case validations do
           [] -> items = Enum.map records, fn(record) -> {table_name, [{:put, to_dynamo(record)} ]} end
-                case :erlcloud_ddb.batch_write_item(items) do
+                case :erlcloud_ddb2.batch_write_item(items) do
                   {:ok, result}   -> {:ok, Enum.map( records, fn (record) -> after_put(record) end )}
                   error           -> error
                 end
@@ -87,7 +102,7 @@ defmodule DDBModel.DB do
 
         case validate(record) do
           :ok ->
-          case :erlcloud_ddb.put_item(table_name, to_dynamo(record), expect_not_exists) do
+          case :erlcloud_ddb2.put_item(table_name, to_dynamo(record), expect_not_exists) do
             {:ok, result}   -> {:ok, after_insert(record)}
             error           -> error
           end
@@ -99,8 +114,8 @@ defmodule DDBModel.DB do
       # expect that the record is new
       defp expect_not_exists do
         case key do
-          {hash, range} -> [expected: [{atom_to_binary(hash), false}, {atom_to_binary(range), false}]]
-          hash          -> [expected: {atom_to_binary(hash), false}]
+          {hash, range} -> [expected: [{Atom.to_string(hash), false}, {Atom.to_string(range), false}]]
+          hash          -> [expected: {Atom.to_string(hash), false}]
         end
       end
 
@@ -120,7 +135,7 @@ defmodule DDBModel.DB do
 
         case validate(record) do
           :ok ->
-          case :erlcloud_ddb.put_item(table_name,to_dynamo(record), expect_exists(record)) do
+          case :erlcloud_ddb2.put_item(table_name,to_dynamo(record), expect_exists(record)) do
             {:ok, result}   -> {:ok, after_update(record)}
             error           -> error
           end
@@ -134,8 +149,8 @@ defmodule DDBModel.DB do
 
       defp expect_exists(k,i) do
         case {k,i} do
-          {{hash, range}, {hash_key, range_key}}  -> [expected: [{atom_to_binary(hash), hash_key }, {atom_to_binary(range), range_key }]]
-          {hash, hash_key} when is_atom(hash)     -> [expected: {atom_to_binary(hash), hash_key }]
+          {{hash, range}, {hash_key, range_key}}  -> [expected: [{Atom.to_string(hash), hash_key }, {Atom.to_string(range), range_key }]]
+          {hash, hash_key} when is_atom(hash)     -> [expected: {Atom.to_string(hash), hash_key }]
         end
       end
 
@@ -163,7 +178,7 @@ defmodule DDBModel.DB do
 
         items = Enum.map record_ids, fn(record_id) -> {:delete, record_id} end
 
-        case :erlcloud_ddb.batch_write_item({TestModelHashKey.table_name, items}) do
+        case :erlcloud_ddb2.batch_write_item({TestModelHashKey.table_name, items}) do
           {:ok, result}   ->  Enum.each record_ids, fn(record_id) -> after_delete(record_id) end
                               {:ok, record_ids}
           error           ->  error
@@ -173,7 +188,7 @@ defmodule DDBModel.DB do
 
       def delete!(record_id) do
         before_delete(record_id)
-        case :erlcloud_ddb.delete_item(table_name, record_id, expect_exists(key,record_id)) do
+        case :erlcloud_ddb2.delete_item(table_name, record_id, expect_exists(key,record_id)) do
           {:ok, result}   ->  after_delete(record_id)
                               {:ok, record_id}
           error           ->  error
@@ -189,7 +204,7 @@ defmodule DDBModel.DB do
 
       # find a list of object by their ids
       def find(ids) when is_list(ids) do
-        case :erlcloud_ddb.batch_get_item({table_name, ids}) do
+        case :erlcloud_ddb2.batch_get_item({table_name, ids}) do
           {:ok, items}     -> result = Enum.map(items, fn(item) -> from_dynamo(item) end)
                               result = Enum.sort result, fn(r1, r2) ->
                                 (Enum.find_index ids, &(r1.id == &1))
@@ -203,7 +218,7 @@ defmodule DDBModel.DB do
 
       # find one object by id
       def find(record_id) do
-        case :erlcloud_ddb.get_item(table_name, record_id) do
+        case :erlcloud_ddb2.get_item(table_name, record_id) do
           {:ok, []}     -> :not_found
           {:ok, item}   -> {:ok, from_dynamo(item)}
         end
@@ -227,7 +242,7 @@ defmodule DDBModel.DB do
 
         spec = Enum.filter spec, fn({k,v}) -> v != nil and v != [] end
 
-        case :erlcloud_ddb.q(table_name,hash_key,spec) do
+        case :erlcloud_ddb2.q(table_name,hash_key,spec) do
           {:ok, {_,_,result,offset,_}} -> {:ok, offset, Enum.map( result, from_dynamo(&(&1)))}
           error                   -> error
         end
@@ -250,7 +265,7 @@ defmodule DDBModel.DB do
 
         spec = Enum.filter spec, fn({k,v}) -> v != nil and v != [] end
 
-        case :erlcloud_ddb.scan(table_name, spec) do
+        case :erlcloud_ddb2.scan(table_name, spec) do
           {:ok,{_,result,_,_,offset,_}} -> {:ok, offset, Enum.map( result, from_dynamo(&(&1)))}
           error -> error
         end

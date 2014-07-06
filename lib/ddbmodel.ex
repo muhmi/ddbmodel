@@ -10,7 +10,6 @@ defmodule DDBModel do
       unquote(DDBModel.Model.generate(:model, opts))
       unquote(DDBModel.Validation.generate(:model))
       unquote(DDBModel.DB.generate(:model))
-
       
       import DDBModel
     end

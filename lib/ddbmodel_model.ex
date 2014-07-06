@@ -5,7 +5,7 @@ defmodule DDBModel.Model do
 
       unquote(generate_table_name(opts[:table_name]))
       unquote(generate_key(opts[:key]))
-
+ 
       # get the model columns from module attributes
       defp model_columns do
         attributes = Enum.filter module_info()[:attributes], fn({k,v}) -> k == :model_column end

@@ -1,9 +1,13 @@
 Code.require_file "../test_helper.exs", __ENV__.file
+Code.require_file "../local_dynamo_config.exs", __ENV__.file
 
 defmodule DDBModelTest do
   use ExUnit.Case
+  require LocalDynamoConfig
   
   setup do
+    :ssl.start()
+    :erlang.put(:aws_config, LocalDynamoConfig.get())
     :os.putenv("AWS_DYNAMO_DB_PREFIX","test.ex_model_dynamo_db.")
     :erlcloud.start()
     :ok
