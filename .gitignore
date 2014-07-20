@@ -1,3 +1,6 @@
 /ebin
 /deps
 erl_crash.dump
+_build
+*.DS_Store
+.fetch
