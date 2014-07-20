@@ -164,7 +164,7 @@ defmodule DDBModelTest do
     {:ok, x1} = TestModelHashKey.new.insert!
     
     {result, x2} = TestModelHashKey.find(x1.uuid)
-    
+
     assert result == :ok and x1 == x2
   end
   

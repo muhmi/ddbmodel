@@ -1,9 +1,7 @@
 defmodule DDBModel.DB do
   def generate(:model) do
 
-
     quote do
-
       def to_dynamo(record={__MODULE__,dict}) do
         res = Enum.map model_columns, fn({k,opts}) ->
           {Atom.to_string(k), to_dynamo(opts[:type], dict[k])}
@@ -11,10 +9,15 @@ defmodule DDBModel.DB do
         Enum.filter res, fn ({k,v}) -> v != nil and v != "" end
       end
 
-      def from_dynamo(dict) do
+      def parse_item(item) do
+        Enum.map item, fn({k, v}) ->
+          {String.to_atom(k), v}
+        end
+      end
 
+      def from_dynamo(dict) do
         res = Enum.map model_columns, fn({k,opts}) ->
-          {k, from_dynamo(opts[:type], dict[Atom.to_string(k)])}
+          {k, from_dynamo(opts[:type], dict[k])}
         end
         new(res)
       end
@@ -176,7 +179,7 @@ defmodule DDBModel.DB do
 
         Enum.each record_ids, fn(record_id) -> before_delete(record_id) end
 
-        items = Enum.map record_ids, fn(record_id) -> {:delete, record_id} end
+        items = Enum.map record_ids, fn(record_id) -> {:delete, {"uuid", record_id}} end
 
         case :erlcloud_ddb2.batch_write_item({TestModelHashKey.table_name, items}) do
           {:ok, result}   ->  Enum.each record_ids, fn(record_id) -> after_delete(record_id) end
@@ -188,7 +191,7 @@ defmodule DDBModel.DB do
 
       def delete!(record_id) do
         before_delete(record_id)
-        case :erlcloud_ddb2.delete_item(table_name, record_id, expect_exists(key,record_id)) do
+        case :erlcloud_ddb2.delete_item(table_name, {"uuid", record_id}, expect_exists(key,record_id)) do
           {:ok, result}   ->  after_delete(record_id)
                               {:ok, record_id}
           error           ->  error
@@ -204,8 +207,11 @@ defmodule DDBModel.DB do
 
       # find a list of object by their ids
       def find(ids) when is_list(ids) do
-        case :erlcloud_ddb2.batch_get_item({table_name, ids}) do
-          {:ok, items}     -> result = Enum.map(items, fn(item) -> from_dynamo(item) end)
+        keys = Enum.map ids, fn(id) ->
+          {"uuid", id}
+        end
+        case :erlcloud_ddb2.batch_get_item({table_name, keys}) do
+          {:ok, items}     -> result = Enum.map(items, fn(item) -> from_dynamo(parse_item(item)) end )
                               result = Enum.sort result, fn(r1, r2) ->
                                 (Enum.find_index ids, &(r1.id == &1))
                                   <
@@ -216,11 +222,12 @@ defmodule DDBModel.DB do
         end
       end
 
+
       # find one object by id
       def find(record_id) do
-        case :erlcloud_ddb2.get_item(table_name, record_id) do
+        case :erlcloud_ddb2.get_item(table_name, {"uuid", record_id}) do
           {:ok, []}     -> :not_found
-          {:ok, item}   -> {:ok, from_dynamo(item)}
+          {:ok, item}   -> {:ok, from_dynamo(parse_item(item))}
         end
       end
 
