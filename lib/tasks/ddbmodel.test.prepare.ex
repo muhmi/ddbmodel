@@ -1,7 +1,7 @@
 Code.require_file "../../../test/test_helper.exs", __ENV__.file
 Code.require_file "../../../test/local_dynamo_config.exs", __ENV__.file
 
-defmodule Mix.Tasks.DDBModel.Test.Prepare do
+defmodule Mix.Tasks.Ddbmodel.Test.Prepare do
   use Mix.Task
   import Mix.Generator
   import Mix.Utils, only: [camelize: 1]
