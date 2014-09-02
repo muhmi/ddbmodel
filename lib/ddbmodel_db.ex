@@ -266,7 +266,7 @@ defmodule DDBModel.DB do
       def scan(predicates \\ [], limit \\ nil, offset \\ nil) do
 
         spec = [ out: :record,
-                 scan_filter: Enum.map(predicates, &pscan_q(&1)),
+                 scan_filter: Enum.map(predicates, &scan_q(&1)),
                  exclusive_start_key: offset,
                  limit: limit]
 
