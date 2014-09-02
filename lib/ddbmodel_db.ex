@@ -280,8 +280,6 @@ defmodule DDBModel.DB do
 
       end
 
-      end
-
     end
   end
 end
