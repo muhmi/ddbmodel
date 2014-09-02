@@ -266,16 +266,19 @@ defmodule DDBModel.DB do
       def scan(predicates \\ [], limit \\ nil, offset \\ nil) do
 
         spec = [ out: :record,
-                 scan_filter: Enum.map(predicates, &scan_q(&1)),
+                 scan_filter: Enum.map(predicates, &pscan_q(&1)),
                  exclusive_start_key: offset,
                  limit: limit]
 
         spec = Enum.filter spec, fn({k,v}) -> v != nil and v != [] end
 
         case :erlcloud_ddb2.scan(table_name, spec) do
-          {:ok,{_,result,_,_,offset,_}} -> {:ok, offset, Enum.map( result, from_dynamo(&(&1)))}
+          {:ok, {:ddb2_scan,consumed_capacity,count,items,last_evaluated_key,scanned_count}} ->
+            {:ok, count, List.flatten(items)}
           error -> error
         end
+
+      end
 
       end
 
