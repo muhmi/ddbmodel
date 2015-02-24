@@ -96,7 +96,7 @@ defmodule TestModels do
     Enum.map tables, fn (model) -> model.create_table() end
   end
 
-  def tearDown do
+  def teardown do
     Enum.map tables, fn (model) -> model.delete_table() end
   end
 end
