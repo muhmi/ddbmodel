@@ -179,7 +179,7 @@ defmodule DDBModel.DB do
 
         Enum.each record_ids, fn(record_id) -> before_delete(record_id) end
 
-        items = Enum.map record_ids, fn(record_id) -> {:delete, {"uuid", record_id}} end
+        items = Enum.map record_ids, fn(record_id) -> {:delete, {key, record_id}} end
 
         case :erlcloud_ddb2.batch_write_item({TestModelHashKey.table_name, items}) do
           {:ok, result}   ->  Enum.each record_ids, fn(record_id) -> after_delete(record_id) end
@@ -191,7 +191,7 @@ defmodule DDBModel.DB do
 
       def delete!(record_id) do
         before_delete(record_id)
-        case :erlcloud_ddb2.delete_item(table_name, {"uuid", record_id}, expect_exists(key,record_id)) do
+        case :erlcloud_ddb2.delete_item(table_name, {key, record_id}, expect_exists(key,record_id)) do
           {:ok, result}   ->  after_delete(record_id)
                               {:ok, record_id}
           error           ->  error
@@ -208,7 +208,7 @@ defmodule DDBModel.DB do
       # find a list of object by their ids
       def find(ids) when is_list(ids) do
         keys = Enum.map ids, fn(id) ->
-          {"uuid", id}
+          {key, id}
         end
         case :erlcloud_ddb2.batch_get_item({table_name, keys}) do
           {:ok, items}     -> result = Enum.map(items, fn(item) -> from_dynamo(parse_item(item)) end )
@@ -225,7 +225,7 @@ defmodule DDBModel.DB do
 
       # find one object by id
       def find(record_id) do
-        case :erlcloud_ddb2.get_item(table_name, {"uuid", record_id}) do
+        case :erlcloud_ddb2.get_item(table_name, {key, record_id}) do
           {:ok, []}     -> :not_found
           {:ok, item}   -> {:ok, from_dynamo(parse_item(item))}
         end
