@@ -7,7 +7,6 @@ defmodule DDBModelTest do
     :ssl.start()
     :os.putenv("AWS_DYNAMO_DB_PREFIX","test.ex_model_dynamo_db.")
     :erlcloud.start()
-    # TestModels.prepare
     :ok
   end
 
