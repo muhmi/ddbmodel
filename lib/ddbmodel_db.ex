@@ -182,7 +182,7 @@ defmodule DDBModel.DB do
 
         items = Enum.map record_ids, fn(record_id) -> {:delete, {to_string(key), record_id}} end
 
-        case :erlcloud_ddb2.batch_write_item({TestModelHashKey.table_name, items}) do
+        case :erlcloud_ddb2.batch_write_item({table_name, items}) do
           {:ok, result}   ->  Enum.each record_ids, fn(record_id) -> after_delete(record_id) end
                               {:ok, record_ids}
           error           ->  error
