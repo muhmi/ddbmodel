@@ -136,7 +136,8 @@ defmodule DDBModel.Database do
     end
 
     def table_file(table_name) do
-        Application.get_env(:ddbmodel, :fs_path) || Application.app_dir(:ddbmodel, "priv/#{table_name}")
+        table_dir = Application.get_env(:ddbmodel, :fs_path) || Application.app_dir(:ddbmodel, "priv")
+        "#{table_dir}/#{table_name}"
     end
 
     def no_match?(item, key, value), do: not match?(item, key, value)
