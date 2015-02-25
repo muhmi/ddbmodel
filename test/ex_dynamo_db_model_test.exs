@@ -77,6 +77,11 @@ defmodule DDBModelTest do
     assert x.validate != :ok
     x = x.set membership: :paid
     assert x.validate == :ok
+    x = x.set membership: :chiken
+    assert x.validate != :ok
+
+    x = x.set membership: "paid"
+    assert x.validate != :ok
   end
   
   test "custom validation" do
