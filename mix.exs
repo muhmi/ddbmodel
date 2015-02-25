@@ -2,7 +2,7 @@ defmodule ExDynamoDbModel.Mixfile do
   use Mix.Project
 
   def project do
-    [ app: :ex_dynamo_db_model,
+    [ app: :ddbmodel,
       version: "0.0.1",
       deps: deps ]
   end
