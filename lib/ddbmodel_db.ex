@@ -47,22 +47,6 @@ defmodule DDBModel.DB do
         end
       end
 
-      def put!(records) when is_list records do
-
-        records = Enum.map records, fn(record) -> before_put(before_save record) end
-        validations = Enum.map records, fn(record) -> validate record end
-        validations = List.flatten(Enum.filter validations, fn(v) -> v != :ok end)
-
-        case validations do
-          [] -> items = Enum.map records, fn(record) -> {table_name, [{:put, to_dynamo(record)} ]} end
-                case DDBModel.Database.batch_write_item(items) do
-                  {:ok, result}   -> {:ok, Enum.map( records, fn (record) -> after_put(record) end )}
-                  error           -> error
-                end
-            _  -> {:error, Enum.map(validations, fn ({:error, err}) -> err end)}
-        end
-      end
-
       # --------------------------------------------
       # Insert
       # --------------------------------------------
@@ -119,8 +103,6 @@ defmodule DDBModel.DB do
       # expect that the record already exists
       defp expect_exists(record={__MODULE__, _dict}), do: expect_exists(key, id(record))
 
-      
-
       # --------------------------------------------
       # Delete
       # --------------------------------------------
@@ -133,26 +115,6 @@ defmodule DDBModel.DB do
       @doc "delete record"
       def delete!(record={__MODULE__,_dict}), do: delete!(id record)
 
-      def delete!(records) when is_list records do
-        record_ids = Enum.map records, fn(record) ->
-          case record do
-            {__MODULE__,_dict}  -> id(record)
-            record_id           -> record_id
-          end
-        end
-
-        Enum.each record_ids, fn(record_id) -> before_delete(record_id) end
-
-        items = Enum.map record_ids, fn(record_id) -> {:delete, {to_string(key), record_id}} end
-
-        case DDBModel.Database.batch_write_item({table_name, items}) do
-          {:ok, result}   ->  Enum.each record_ids, fn(record_id) -> after_delete(record_id) end
-                              {:ok, record_ids}
-          error           ->  error
-        end
-
-      end
-
       def delete!(record_id) do
         before_delete(record_id)
         case DDBModel.Database.delete_item(table_name, {to_string(key), record_id}, expect_exists(key,record_id)) do
@@ -162,30 +124,9 @@ defmodule DDBModel.DB do
         end
       end
 
-
       # --------------------------------------------
       # Find by ID
       # --------------------------------------------
-
-      # TODO: implement batch find across models
-
-      # find a list of object by their ids
-      def find(ids) when is_list(ids) do
-        keys = Enum.map ids, fn(id) ->
-          {to_string(key), id}
-        end
-        case DDBModel.Database.batch_get_item({table_name, keys}) do
-          {:ok, items}     -> result = Enum.map(items, fn(item) -> from_dynamo(parse_item(item)) end )
-                              result = Enum.sort result, fn(r1, r2) ->
-                                (Enum.find_index ids, &(r1.id == &1))
-                                  <
-                                (Enum.find_index ids, &(r2.id == &1))
-                               end
-                              {:ok, result }
-          error            -> error
-        end
-      end
-
 
       # find one object by id
       def find(record_id) do

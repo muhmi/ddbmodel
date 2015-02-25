@@ -123,15 +123,6 @@ defmodule DDBModelTest do
     assert status == :ok
   end
 
-  test "put many!" do
-    x1 = TestModelHashKey.new
-    x2 = TestModelHashKey.new
-
-    {status, _} = TestModelHashKey.put! [x1,x2]
-
-    assert status == :ok
-  end
-
   test "insert!" do
     {status, x} = TestModelHashKey.new.insert!
 
@@ -159,21 +150,6 @@ defmodule DDBModelTest do
     assert status != :ok
   end
 
-  test "batch delete" do
-
-    {:ok, x1} = TestModelHashKey.new.insert!
-    {:ok, x2} = TestModelHashKey.new.insert!
-
-    TestModelHashKey.delete! [x1, x2]
-
-    {status, _} = x1.delete!
-    assert status != :ok
-
-    {status, _} = x2.delete!
-    assert status != :ok
-
-  end
-
   test "find" do
     {:ok, x1} = TestModelHashKey.new.insert!
 
@@ -181,16 +157,5 @@ defmodule DDBModelTest do
 
     assert result == :ok and x1 == x2
   end
-
-  test "batch find" do
-
-    {:ok, x2} = TestModelHashKey.new.insert!
-    {:ok, x1} = TestModelHashKey.new.insert!
-
-    {result, [xf1, xf2]} = TestModelHashKey.find [x1.uuid, x2.uuid]
-
-    assert result == :ok and x1 == xf1 and x2 == xf2
-  end
-
 
 end

@@ -1,3 +1,12 @@
+
+*NOTE: I have modified and stripped down the behaviour of this module for my use*
+
+Major changes:
+
+- Support for local dynamodb to run tests dropped
+- Removed All batch operations
+- Changed how table names are formed from ENV variable specific config to use Mix.env
+
 DDBModel
 ==========================
 
