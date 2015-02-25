@@ -75,7 +75,6 @@ defmodule DDBModel.DB do
 
 
       def put!(records) when is_list records do
-        # res = :erlcloud_ddb2.batch_write_item([{TestModelHashKey.table_name, [{:put, [{"uuid", "12345"} ]}]}])
 
         records = Enum.map records, fn(record) -> before_put(before_save record) end
         validations = Enum.map records, fn(record) -> validate record end
