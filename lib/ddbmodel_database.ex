@@ -35,10 +35,6 @@ defmodule DDBModel.Database do
     def q(table_name, hash_key, spec) do
         dynamodb_backend.q(table_name, hash_key, spec)
     end
-
-    def scan(table_name, spec) do
-        dynamodb_backend.scan(table_name, spec)
-    end
         
     def dynamodb_backend do
         Application.get_env(:ex_dynamo_db_model, :dynamodb_backend) || DDBModel.Database.AWS

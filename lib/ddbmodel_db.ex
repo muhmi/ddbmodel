@@ -219,31 +219,6 @@ defmodule DDBModel.DB do
         end
       end
 
-
-      # --------------------------------------------
-      # Scan
-      # --------------------------------------------
-
-      defp scan_q({k,op,v}) when op in [:in,:eq,:ne,:le,:lt,:ge,:gt,:contains,:not_contains,:begins_with], do: {k, v, op}
-      defp scan_q({k, :between, {v1, v2}}), do: {k, {v1, v2}, :between}
-
-      def scan(predicates \\ [], limit \\ nil, offset \\ nil) do
-
-        spec = [ out: :record,
-                 scan_filter: Enum.map(predicates, &scan_q(&1)),
-                 exclusive_start_key: offset,
-                 limit: limit]
-
-        spec = Enum.filter spec, fn({k,v}) -> v != nil and v != [] end
-
-        case DDBModel.Database.scan(table_name, spec) do
-          {:ok, {:ddb2_scan,consumed_capacity,count,items,last_evaluated_key,scanned_count}} ->
-            {:ok, count, List.flatten(items)}
-          error -> error
-        end
-
-      end
-
     end
   end
 end
