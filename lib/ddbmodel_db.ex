@@ -2,40 +2,23 @@ defmodule DDBModel.DB do
   def generate(:model) do
 
     quote do
+
+      import DDBModel.Transform
+
       def to_dynamo(record={__MODULE__,dict}) do
         res = Enum.map model_columns, fn({k,opts}) ->
           {Atom.to_string(k), to_dynamo(opts[:type], dict[k])}
         end
         Enum.filter res, fn ({k,v}) -> v != nil and v != "" end
       end
-
-      def parse_item(item) do
-        Enum.map item, fn({k, v}) ->
-          {String.to_atom(k), v}
-        end
-      end
-
+      
       def from_dynamo(dict) do
         res = Enum.map model_columns, fn({k,opts}) ->
           {k, from_dynamo(opts[:type], dict[k])}
         end
         new(res)
       end
-
-      def to_dynamo(:atom, v),    do: Atom.to_string(v)
-      def from_dynamo(:atom, v),  do: String.to_atom(v)
-
-      def to_dynamo(:binary, v),    do: {:b, v}
-      def from_dynamo(:binary, v),  do: v
-
-      def to_dynamo(:json, nil),        do: "null"
-      def from_dynamo(:json, "null"),   do: nil
-      def to_dynamo(:json, v),          do: :jsx.encode(v)
-      def from_dynamo(:json, v),        do: :jsx.decode(v)
-
-      def to_dynamo(_,v),   do: v
-      def from_dynamo(_,v), do: v
-
+      
       def create_table do
         case DDBModel.DynamoDB.create_table(table_name, {key, :s}, key, 1, 1) do
           {:ok, result}   -> :ok
