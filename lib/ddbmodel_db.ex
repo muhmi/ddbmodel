@@ -195,30 +195,6 @@ defmodule DDBModel.DB do
         end
       end
 
-      # --------------------------------------------
-      # Query
-      # --------------------------------------------
-
-      defp query_q({op, range_key}) when op in [:eq,:le,:lt,:ge,:gt,:begins_with], do: {range_key, op}
-      defp query_q({:between, range_key1, range_key2}), do: {{range_key1, range_key2}, :between}
-      defp query_q(nil), do: nil
-
-      def query(hash_key, predicate \\ nil, limit \\ nil, offset \\ nil, forward \\ true) do
-
-        spec = [ scan_index_forward: forward,
-                 out: :record,
-                 range_key_condition: query_q(predicate),
-                 exclusive_start_key: offset,
-                 limit: limit]
-
-        spec = Enum.filter spec, fn({k,v}) -> v != nil and v != [] end
-
-        case DDBModel.Database.q(table_name,hash_key,spec) do
-          {:ok, {_,_,result,offset,_}} -> {:ok, offset, Enum.map( result, from_dynamo(&(&1)))}
-          error                   -> error
-        end
-      end
-
     end
   end
 end
