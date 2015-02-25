@@ -3,7 +3,7 @@ Code.require_file "../../../test/test_helper.exs", __ENV__.file
 defmodule Mix.Tasks.Test.Prepare do
   use Mix.Task
 
-  @shortdoc "Prepares environment for testing"
+  @shortdoc "Prepares environment for testing. Remember to set MIX_ENV=test !!!"
 
   @moduledoc """
   ## Examples
@@ -15,7 +15,6 @@ defmodule Mix.Tasks.Test.Prepare do
     OptionParser.parse(args)
 
     :ssl.start()
-    :os.putenv("AWS_DYNAMO_DB_PREFIX","test.ex_model_dynamo_db.")
     :erlcloud.start()
 
     TestModels.prepare()

@@ -15,7 +15,6 @@ defmodule Mix.Tasks.Test.Teardown do
     OptionParser.parse(args)
 
     :ssl.start()
-    :os.putenv("AWS_DYNAMO_DB_PREFIX","test.ex_model_dynamo_db.")
     :erlcloud.start()
 
     TestModels.teardown

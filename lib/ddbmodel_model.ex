@@ -5,7 +5,7 @@ defmodule DDBModel.Model do
 
       unquote(generate_table_name(opts[:table_name]))
       unquote(generate_key(opts[:key]))
- 
+
       # get the model columns from module attributes
       defp model_columns do
         attributes = Enum.filter module_info()[:attributes], fn({k,v}) -> k == :model_column end
@@ -46,18 +46,12 @@ defmodule DDBModel.Model do
 
   def generate_table_name(nil) do
     quote do
-      def table_name do
-        case :os.getenv('AWS_DYNAMO_DB_PREFIX') do
-          false  -> inspect(__MODULE__)
-          prefix -> :binary.list_to_bin(prefix)  <> inspect(__MODULE__)
-        end
-      end
+      def table_name, do: Atom.to_string(Mix.env) <> "_" <> inspect(__MODULE__)
     end
   end
-
-  def generate_table_name(table_name) do
+  def generate_table_name(name) do
     quote do
-      def table_name, do: unquote(table_name)
+      def table_name, do: unquote(name)
     end
   end
 

@@ -12,11 +12,8 @@ defmodule ExDynamoDbModel.Mixfile do
     []
   end
 
-  # Returns the list of dependencies in the format:
-  # { :foobar, "0.1", git: "https://github.com/elixir-lang/foobar.git" }
   defp deps do
     [ { :uuid,              github: "avtobiff/erlang-uuid"      },
-      { :meck,              github: "eproxus/meck", override: true },
       { :jsx,               github: "talentdeficit/jsx", override: true},
       { :erlcloud,          github: "gleber/erlcloud"           }]
   end

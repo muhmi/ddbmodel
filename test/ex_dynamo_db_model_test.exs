@@ -5,17 +5,16 @@ defmodule DDBModelTest do
   
   setup do
     :ssl.start()
-    :os.putenv("AWS_DYNAMO_DB_PREFIX","test.ex_model_dynamo_db.")
     :erlcloud.start()
     :ok
   end
 
   test "default table name" do
-    assert TestDefaultTableName.table_name == "test.ex_model_dynamo_db.TestDefaultTableName"
+    assert TestDefaultTableName.table_name == "test_TestDefaultTableName"
   end
   
   test "custom table name" do
-    assert TestCustomTableName.table_name == "Custom"
+    assert TestCustomTableName.table_name == "test_Custom"
   end
   
   test "default key" do

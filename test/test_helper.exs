@@ -6,7 +6,7 @@ defmodule TestDefaultTableName do
 end
 
 defmodule TestCustomTableName do
-  use DDBModel, table_name: "Custom"
+  use DDBModel, table_name: "test_Custom"
 end
 
 defmodule TestDefaultKey do

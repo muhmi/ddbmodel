@@ -1,5 +1,5 @@
 %{"erlcloud": {:git, "git://github.com/gleber/erlcloud.git", "bdd6d9b80d278610cbdf2924f9b918a36e2ba6f5", []},
   "jsx": {:git, "git://github.com/talentdeficit/jsx.git", "507fa4c41db33c81e925ab53f4d789d234aaff2f", []},
   "lhttpc": {:git, "git://github.com/talko/lhttpc", "2d01a5f9c7543b77bdd57f44c92e72801f46e423", [ref: "master"]},
-  "meck": {:git, "git://github.com/eproxus/meck.git", "2eb19524a0cf33a0fc67fed766679c93d363ceee", []},
+  "meck": {:git, "https://github.com/eproxus/meck.git", "98cdc40fe6ae7780491ed8d0db691dd15625e9b2", [ref: "master"]},
   "uuid": {:git, "git://github.com/avtobiff/erlang-uuid.git", "9cfe9666f1787d27550495c9c9cfa0297d861252", []}}
