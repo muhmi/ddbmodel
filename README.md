@@ -6,6 +6,7 @@ Major changes:
 - Support for local dynamodb to run tests dropped
 - Removed All batch operations
 - Changed how table names are formed from ENV variable specific config to use Mix.env
+- Added support for loading / storing data to JSON files in local file system
 
 DDBModel
 ==========================
