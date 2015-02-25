@@ -94,7 +94,7 @@ defmodule DDBModelTest do
     pid = :erlang.binary_to_term(item.data)
     assert res == :ok
     assert pid == self
-    #{:ok, _item} = item.delete!
+    {:ok, _item} = item.delete!
   end
 
   test "custom validation" do
