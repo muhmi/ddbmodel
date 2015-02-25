@@ -64,7 +64,7 @@ defmodule DDBModel.DB do
         case validate(record) do
           :ok ->
           case DDBModel.Database.put_item(table_name, {key, id(record)}, to_dynamo(record), expect_not_exists) do
-            {:ok, result}   -> {:ok, after_insert(record)}
+            {:ok, _}   -> {:ok, after_insert(record)}
             error           -> error
           end
           error -> error

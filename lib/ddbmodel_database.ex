@@ -62,38 +62,54 @@ defmodule DDBModel.Database do
     def delete_table(_table_name), do: {:ok, nil}
 
     def put_item(table_name, key_spec, item) do
-       put(table_name, key_spec, item, false)
+       put_or_replace(table_name, key_spec, item)
     end
 
-    def put_item(table_name, key_spec, item, _expect_not_exists) do
-        put(table_name, key_spec, item, true)
+    def put_item(table_name, key_spec, item, [expected: {_id, false}] = _expect_not_to_exist) do
+        put_new(table_name, key_spec, item)
     end
 
-    def put(table_name, {id_key, id_value}, item, should_exist) do
-      items = read_table(table_name) |>  Enum.filter(&match?(&1, id_key, id_value))
-      IO.puts("put #{inspect id_key}=#{inspect id_value}, should_exist:#{should_exist} table: #{table_name}")
-      if should_exist and Enum.find(items, &match?(&1, id_key, id_value)) == nil do
-        {:error, item}
-      else
-        items = [item | items]
-        write_table(table_name, items)
-        {:ok, nil}
+    def put_item(table_name, {key, val}, item, [expected: _id] = expect) when is_atom(key), do: put_item(table_name, {Atom.to_string(key), val}, item, expect)
+    def put_item(table_name, key_spec, item, [expected: _id] = _expect_to_exist) do
+        case get_item(table_name, key_spec) do
+          {:ok, []} -> {:error, :does_not_exist}
+          {:ok, _} -> put_or_replace(table_name, key_spec, item) 
+        end
+    end
+
+    def put_new(table_name, {key, val}, item) when is_atom(key), do: put_new(table_name, {Atom.to_string(key), val}, item)
+    def put_new(table_name, key_spec, item) do
+      case get_item(table_name, key_spec) do
+        {:ok, []} -> put_or_replace(table_name, key_spec, item)
+        {:ok, _} -> {:error, :already_exists}
       end
     end
 
+    def put_or_replace(table_name, {id_key, id_value}, item) do
+      items = read_table(table_name) |>  Enum.filter(&match?(&1, id_key, id_value))
+      item = item |> Enum.map(fn({k, v}) -> {k, encode_binaries(v)} end)
+      items = [item | items]
+      write_table(table_name, items)
+      {:ok, item}
+    end
+
     def delete_item(table_name, {id_key, id_value}, _expect_exists) do
-        IO.puts("delete_item #{inspect id_key}=#{inspect id_value} table: #{table_name}")
         items = read_table(table_name)
-        items = items |> Enum.filter(&match?(&1, id_key, id_value))
+        item = Enum.find(items, &match?(&1, id_key, id_value))
+        items = items |> Enum.filter(&no_match?(&1, id_key, id_value))
         write_table(table_name, items)
-        {:ok, nil}
+        if item != nil do
+          {:ok, nil}
+        else
+          {:error, :does_not_exist}
+        end
     end
 
     def get_item(table_name, {id_key, id_value}) do
         items = read_table(table_name)
-        IO.puts("get_item #{inspect id_key}=#{inspect id_value} table: #{table_name}")
         item = Enum.find(items, &match?(&1, id_key, id_value))
         if item != nil do
+            item = item |> Enum.map(fn({k, v}) -> {k, decode_binaries(v)} end)
             {:ok, item}
         else
             {:ok, []}
@@ -109,6 +125,12 @@ defmodule DDBModel.Database do
         end
     end
 
+    def decode_binaries("_bin_hack_" <> v = _msg), do: Base.decode64!(v)
+    def decode_binaries(v), do: v
+
+    def encode_binaries({:b, v}), do: "_bin_hack_" <> Base.encode64(v)
+    def encode_binaries(v), do: v
+
     def write_table(table_name, items) do
         File.write! table_file(table_name), :jsx.encode(items, [:indent])
     end
@@ -116,6 +138,8 @@ defmodule DDBModel.Database do
     def table_file(table_name) do
         Application.get_env(:ddbmodel, :fs_path) || Application.app_dir(:ddbmodel, "priv/#{table_name}")
     end
+
+    def no_match?(item, key, value), do: not match?(item, key, value)
 
     def match?(item, key, value) do
         item = Enum.find(item, fn({k, v})-> k == key && v == value end)

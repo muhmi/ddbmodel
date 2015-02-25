@@ -6,6 +6,7 @@ defmodule DDBModelTest do
   setup do
     :ssl.start()
     :erlcloud.start()
+    # Application.put_env(:ddbmodel, :backend, DDBModel.Database.FS)
     :ok
   end
 
