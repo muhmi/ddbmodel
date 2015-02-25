@@ -47,7 +47,6 @@ defmodule DDBModel.DB do
         end
       end
 
-
       def put!(records) when is_list records do
 
         records = Enum.map records, fn(record) -> before_put(before_save record) end
@@ -90,12 +89,7 @@ defmodule DDBModel.DB do
       end
 
       # expect that the record is new
-      defp expect_not_exists do
-        case key do
-          {hash, range} -> [expected: [{Atom.to_string(hash), false}, {Atom.to_string(range), false}]]
-          hash          -> [expected: {Atom.to_string(hash), false}]
-        end
-      end
+      defp expect_not_exists, do: expect_not_exists(key)
 
       # --------------------------------------------
       # Update
@@ -123,14 +117,9 @@ defmodule DDBModel.DB do
       end
 
       # expect that the record already exists
-      defp expect_exists(record={__MODULE__, _dict}), do: expect_exists(key,id(record))
+      defp expect_exists(record={__MODULE__, _dict}), do: expect_exists(key, id(record))
 
-      defp expect_exists(k,i) do
-        case {k,i} do
-          {{hash, range}, {hash_key, range_key}}  -> [expected: [{Atom.to_string(hash), hash_key }, {Atom.to_string(range), range_key }]]
-          {hash, hash_key} when is_atom(hash)     -> [expected: {Atom.to_string(hash), hash_key }]
-        end
-      end
+      
 
       # --------------------------------------------
       # Delete
