@@ -35,8 +35,8 @@ defmodule TestDefColumn do
 end
 
 defmodule TestBinaryData do
-  use DDBModel, key: :uuid
-  defcolumn :uuid, type: :uuid
+  use DDBModel, key: :data_id
+  defcolumn :data_id
   defcolumn :data, type: :binary
 end
 

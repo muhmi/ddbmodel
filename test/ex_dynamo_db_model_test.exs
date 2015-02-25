@@ -86,10 +86,10 @@ defmodule DDBModelTest do
 
   test "binary data" do
     bin_data = :erlang.term_to_binary(self)
-    item = TestBinaryData.new data: bin_data
+    item = TestBinaryData.new data: bin_data, data_id: "lol"
     {res, item} = item.insert!
     assert res == :ok
-    {res, item} = TestBinaryData.find(item.uuid)
+    {res, item} = TestBinaryData.find(item.data_id)
     assert item.data == bin_data
     pid = :erlang.binary_to_term(item.data)
     assert res == :ok

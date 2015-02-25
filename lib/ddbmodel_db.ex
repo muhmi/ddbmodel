@@ -39,7 +39,7 @@ defmodule DDBModel.DB do
 
         case validate(record) do
           :ok ->
-            case DDBModel.Database.put_item(table_name, to_dynamo(record)) do
+            case DDBModel.Database.put_item(table_name, {key, id(record)}, to_dynamo(record)) do
               {:ok, result}   -> {:ok, after_put(record)}
               error           -> error
             end
@@ -63,7 +63,7 @@ defmodule DDBModel.DB do
 
         case validate(record) do
           :ok ->
-          case DDBModel.Database.put_item(table_name, to_dynamo(record), expect_not_exists) do
+          case DDBModel.Database.put_item(table_name, {key, id(record)}, to_dynamo(record), expect_not_exists) do
             {:ok, result}   -> {:ok, after_insert(record)}
             error           -> error
           end
@@ -91,7 +91,7 @@ defmodule DDBModel.DB do
 
         case validate(record) do
           :ok ->
-          case DDBModel.Database.put_item(table_name,to_dynamo(record), expect_exists(record)) do
+          case DDBModel.Database.put_item(table_name, {key, id(record)}, to_dynamo(record), expect_exists(record)) do
             {:ok, result}   -> {:ok, after_update(record)}
             error           -> error
           end
@@ -118,8 +118,7 @@ defmodule DDBModel.DB do
       def delete!(record_id) do
         before_delete(record_id)
         case DDBModel.Database.delete_item(table_name, {to_string(key), record_id}, expect_exists(key,record_id)) do
-          {:ok, result}   ->  after_delete(record_id)
-                              {:ok, record_id}
+          {:ok, _result}   -> after_delete(record_id); {:ok, record_id}
           error           ->  error
         end
       end
