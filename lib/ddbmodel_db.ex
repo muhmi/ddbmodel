@@ -4,6 +4,7 @@ defmodule DDBModel.DB do
     quote do
 
       import DDBModel.Transform
+      import DDBModel.DB.Functions
 
       def to_dynamo(record={__MODULE__,dict}) do
         res = Enum.map model_columns, fn({k,opts}) ->
@@ -18,20 +19,10 @@ defmodule DDBModel.DB do
         end
         new(res)
       end
-      
-      def create_table do
-        case DDBModel.DynamoDB.create_table(table_name, {key, :s}, key, 1, 1) do
-          {:ok, result}   -> :ok
-          error           -> error
-        end
-      end
 
-      def delete_table do
-        case DDBModel.DynamoDB.delete_table(table_name) do
-          {:ok, result}   -> :ok
-          error           -> error
-        end
-      end
+      def create_table, do: create_table(table_name, key, 1, 1)
+      def delete_table, do: delete_table(table_name)
+  
       # --------------------------------------------
       # Put
       # --------------------------------------------
