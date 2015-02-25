@@ -25,6 +25,9 @@ defmodule DDBModel.DB do
       def to_dynamo(:atom, v),    do: Atom.to_string(v)
       def from_dynamo(:atom, v),  do: String.to_atom(v)
 
+      def to_dynamo(:binary, v),    do: {:b, v}
+      def from_dynamo(:binary, v),  do: v
+
       def to_dynamo(:json, nil),        do: "null"
       def from_dynamo(:json, "null"),   do: nil
       def to_dynamo(:json, v),          do: :jsx.encode(v)
@@ -32,7 +35,6 @@ defmodule DDBModel.DB do
 
       def to_dynamo(_,v),   do: v
       def from_dynamo(_,v), do: v
-
 
       def create_table do
         case :erlcloud_ddb2.create_table(table_name, {key, :s}, key, 1, 1) do

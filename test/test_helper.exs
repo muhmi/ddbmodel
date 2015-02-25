@@ -34,6 +34,12 @@ defmodule TestDefColumn do
   defcolumn :uuid
 end
 
+defmodule TestBinaryData do
+  use DDBModel, key: :uuid
+  defcolumn :uuid, type: :uuid
+  defcolumn :data, type: :binary
+end
+
 defmodule TestDefColumnDefault do
   use DDBModel
   
@@ -88,7 +94,8 @@ defmodule TestModels do
       TestMassAssignment,
       TestValidate,
       TestCustomValidate,
-      TestModelHashKey
+      TestModelHashKey,
+      TestBinaryData
     ]
   end
 
