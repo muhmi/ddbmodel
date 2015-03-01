@@ -2,6 +2,8 @@ defmodule DDBModel.Validation do
   
   def generate(:model) do
     quote do
+
+      import DDBModel.Util
       
       def validate(record={__MODULE__, dict}) do
         res = Enum.map model_columns, fn({k,opts}) ->
@@ -51,14 +53,7 @@ defmodule DDBModel.Validation do
       end
       
       defoverridable [before_save: 1]
-      
-      def unix_timestamp do
-        utc = :calendar.now_to_universal_time(:erlang.now())
-        greg = :calendar.datetime_to_gregorian_seconds(utc) 
-        greg_1970 = :calendar.datetime_to_gregorian_seconds( {{1970,1,1},{0,0,0}} )
-    
-        greg - greg_1970
-      end
+     
       
       
       def before_save(:uuid, v) do
