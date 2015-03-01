@@ -12,7 +12,7 @@ defmodule DDBModel.DB do
         end
         Enum.filter res, fn ({k,v}) -> v != nil and v != "" end
       end
-      
+
       def from_dynamo(dict) do
         res = Enum.map model_columns, fn({k,opts}) ->
           {k, from_dynamo(opts[:type], dict[k])}
@@ -22,25 +22,20 @@ defmodule DDBModel.DB do
 
       def create_table, do: create_table(table_name, key, 1, 1)
       def delete_table, do: delete_table(table_name)
-  
+
       # --------------------------------------------
       # Put
       # --------------------------------------------
 
-      def before_put(record={__MODULE__,_dict}), do: record
-      def after_put(record={__MODULE__,_dict}), do: record
-
-      defoverridable [before_put: 1, after_put: 1]
-
       @doc "update record when it exists, otherwise insert"
       def put!(record={__MODULE__,_dict}) do
 
-        record = before_put(before_save record)
+        record = before_save record
 
         case validate(record) do
           :ok ->
             case DDBModel.Database.put_item(table_name, {key, id(record)}, to_dynamo(record)) do
-              {:ok, result}   -> {:ok, after_put(record)}
+              {:ok, result}   -> {:ok, record}
               error           -> error
             end
           error -> error
@@ -51,20 +46,15 @@ defmodule DDBModel.DB do
       # Insert
       # --------------------------------------------
 
-      def before_insert(record={__MODULE__,_dict}), do: record
-      def after_insert(record={__MODULE__,_dict}), do: record
-
-      defoverridable [before_insert: 1, after_insert: 1]
-
       @doc "insert record, error when it exists"
       def insert!(record={__MODULE__,_dict}) do
 
-        record = before_insert(before_save record)
+        record = before_save record
 
         case validate(record) do
           :ok ->
           case DDBModel.Database.put_item(table_name, {key, id(record)}, to_dynamo(record), expect_not_exists) do
-            {:ok, _}   -> {:ok, after_insert(record)}
+            {:ok, _}   -> {:ok, record}
             error           -> error
           end
           error -> error
@@ -79,20 +69,15 @@ defmodule DDBModel.DB do
       # Update
       # --------------------------------------------
 
-      def before_update(record={__MODULE__,_dict}), do: record
-      def after_update(record={__MODULE__,_dict}), do: record
-
-      defoverridable [before_update: 1, after_update: 1]
-
       @doc "update record, error when it doesn't exist"
       def update!(record={__MODULE__,_dict}) do
 
-        record = before_update(before_save record)
+        record = before_save record
 
         case validate(record) do
           :ok ->
           case DDBModel.Database.put_item(table_name, {key, id(record)}, to_dynamo(record), expect_exists(record)) do
-            {:ok, result}   -> {:ok, after_update(record)}
+            {:ok, result}   -> {:ok, record}
             error           -> error
           end
           error -> error
@@ -107,18 +92,12 @@ defmodule DDBModel.DB do
       # Delete
       # --------------------------------------------
 
-      def before_delete(record_id), do: record_id
-      def after_delete(record_id), do: record_id
-
-      defoverridable [before_delete: 1, after_delete: 1]
-
       @doc "delete record"
       def delete!(record={__MODULE__,_dict}), do: delete!(id record)
 
       def delete!(record_id) do
-        before_delete(record_id)
         case DDBModel.Database.delete_item(table_name, {to_string(key), record_id}, expect_exists(key,record_id)) do
-          {:ok, _result}   -> after_delete(record_id); {:ok, record_id}
+          {:ok, _result}   -> {:ok, record_id}
           error           ->  error
         end
       end
