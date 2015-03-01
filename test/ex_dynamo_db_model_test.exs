@@ -1,4 +1,4 @@
-Code.require_file "../test_helper.exs", __ENV__.file
+Code.require_file "../models.exs", __ENV__.file
 
 defmodule DDBModelTest do
   use ExUnit.Case
@@ -6,7 +6,7 @@ defmodule DDBModelTest do
   setup do
     :ssl.start()
     :erlcloud.start()
-    # Application.put_env(:ddbmodel, :backend, DDBModel.Database.FS)
+    Application.put_env(:ddbmodel, :backend, DDBModel.Database.FS)
     :ok
   end
 
