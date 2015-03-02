@@ -6,17 +6,6 @@ defmodule DDBModel.Model do
       unquote(generate_table_name(opts[:table_name]))
       unquote(generate_key(opts[:key]))
 
-      # get the model columns from module attributes
-      defp model_columns do
-        attributes = Enum.filter module_info()[:attributes], fn({k,v}) -> k == :model_column end
-        Enum.map attributes, fn ({:model_column, [{name, attr}]}) -> {name, attr} end
-      end
-
-      # get default values for the model columns
-      defp model_column_defaults do
-        Enum.map model_columns, fn ({key, attr}) -> {key, attr[:default]} end
-      end
-
       @doc "make record and init with default values"
       def new (attributes \\ []) do
         {__MODULE__, HashDict.merge( Enum.into(model_column_defaults, HashDict.new), Enum.into(attributes, HashDict.new))}

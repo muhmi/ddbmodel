@@ -4,7 +4,7 @@ defmodule DDBModel.Columns do
     quote do
       unquote(make_getter(name))
       unquote(make_setter(name))
-      @model_column {unquote(name), unquote(opts)}
+      @model_columns {unquote(name), unquote(opts)}
     end
   end
 

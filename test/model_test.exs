@@ -57,12 +57,12 @@ defmodule DDBModelTest do
     assert x.first_name == "_" and x.last_name == "_" and x.password == "black_lodge123"
   end
 
-  test "validate by function" do
-    x = TestValidate.new first_name: "Joe", last_name: "Schmoe"
-    assert x.validate != :ok
-    x = x.set first_name: "John", last_name: "Doe"
-    assert x.validate == :ok
-  end
+ # test "validate by function" do
+ #   x = TestValidate.new first_name: "Joe", last_name: "Schmoe"
+ #   assert x.validate != :ok
+ #   x = x.set first_name: "John", last_name: "Doe"
+ #   assert x.validate == :ok
+ # end
 
   test "validate not null" do
     x = TestValidate.new
